@@ -11,6 +11,9 @@ Esra'nın SQL / pandas / NumPy alıştırma uygulaması. Kullanıcıyla Türkçe
   - `app.js` (arayüz), `helper.py` (Pyodide içinde çalışan çıktı dönüştürücü), `template.html` (CSS + iskelet)
 - `index.html`, `sw.js`, `manifest.webmanifest` **üretilir** — elle düzenleme, `kaynak/build.py` çalıştır.
 
+## Yapılacaklar
+Bekleyen istekler `YAPILACAKLAR.md` dosyasında. Kullanıcı "yapılacaklar listesindekileri yap" derse oradan başla.
+
 ## Soru ekleme akışı
 1. İlgili bankaya soru ekle. Alanlar: `id` (benzersiz), `dil` (`sql`|`python`), `seviye` (1-3), `kategori`, `baslik`, `soru` (HTML), `ipucu`, `cozum`, `aciklama` (HTML, öğretici), isteğe bağlı `sirali: true`.
    - SQL çözümleri SQLite lehçesinde. Python çözümleri sonucu `sonuc` değişkenine atar; tablolar aynı isimli DataFrame olarak hazırdır.
