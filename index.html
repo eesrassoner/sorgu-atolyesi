@@ -10,9 +10,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sorgu Atölyesi">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="ikon/apple-touch-icon.png">
-<link rel="icon" type="image/png" href="ikon/icon-192.png">
-<link rel="stylesheet" href="lib/fonts/fonts.css">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="fonts.css">
 <style>
 /* Yön: laboratuvar defteri. Serin kâğıt zemin, kobalt vurgu; SQL mavi, Python hardal. Üstte sabit bar, altında 3 kolon (liste · çalışma · şema). */
 :root {
@@ -322,8 +322,8 @@ legend { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 .bos-durum { max-width: 620px; margin: 40px auto; background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 14px; padding: 28px; display: grid; gap: 10px; text-align: left; }
 .bos-durum p { color: var(--soluk); }
 </style>
-<script src="lib/sql-asm.js"></script>
-<script src="lib/xlsx.full.min.js"></script>
+<script src="sql-asm.js"></script>
+<script src="xlsx.full.min.js"></script>
 </head>
 <body>
 <header class="ust">
@@ -1144,7 +1144,7 @@ function sqlExec(db, kod) {
 }
 
 // ═══════════════ Python motoru (Pyodide) ═══════════════
-const PY_KAYNAKLAR = [new URL('pyodide/', location.href).href];
+const PY_KAYNAKLAR = [new URL('./', location.href).href];
 const PY_EK = '.wasm';
 const PY_PAKETLER = ['six', 'python_dateutil', 'pytz', 'numpy', 'pandas'];
 let pyAsama = '';
