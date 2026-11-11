@@ -150,6 +150,8 @@ main { padding: 18px max(16px, 2vw) 40px; }
 .editor { display: grid; grid-template-columns: auto 1fr; background: var(--kod-zemin); min-height: var(--h, 200px); height: var(--h, 200px); resize: vertical; overflow: hidden; }
 .gutter { margin: 0; padding: 12px 8px 12px 14px; text-align: right; color: var(--h-yorum); user-select: none; overflow: hidden; font: 13.5px/1.6 var(--f-kod); border-right: 1px solid var(--cizgi); min-width: 42px; }
 .editor textarea { border: 0; outline: none; resize: none; padding: 12px 14px; background: transparent; font: 13.5px/1.6 var(--f-kod); color: var(--murekkep); tab-size: 4; white-space: pre; overflow: auto; height: 100%; }
+.editor textarea::placeholder { color: var(--h-yorum); opacity: 1; font-style: italic; }
+.editor textarea:focus::placeholder { color: transparent; }
 .editor:focus-within { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--vurgu) 45%, transparent); }
 .arac-cubugu { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; border-top: 1px solid var(--cizgi); }
 .soru-kart .arac-cubugu, .bos-durum .arac-cubugu { border: 0; padding: 0; }
@@ -1323,12 +1325,12 @@ function mdLite(s) {
 
 // ═══════════════ Editör ═══════════════
 let aktifEditor = null;
-function editorKur(host, { deger = '', dil = 'sql', calistir: onRun, degisti, yukseklik = 200 }) {
+function editorKur(host, { deger = '', dil = 'sql', calistir: onRun, degisti, yukseklik = 200, yerTutucu = '' }) {
   host.innerHTML = `<div class="editor" style="--h:${yukseklik}px"><pre class="gutter" aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="${dil === 'sql' ? 'SQL sorgusu' : 'Python kodu'}"></textarea></div>`;
   const ta = $('textarea', host), gut = $('.gutter', host);
   const guncelle = () => { const n = ta.value.split('\n').length; gut.textContent = Array.from({ length: n }, (_, i) => i + 1).join('\n'); gut.scrollTop = ta.scrollTop; };
   const ekle = t => { ta.focus(); if (!document.execCommand('insertText', false, t)) { ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, 'end'); } guncelle(); degisti && degisti(ta.value); };
-  ta.value = deger; guncelle();
+  ta.value = deger; ta.placeholder = yerTutucu; guncelle();
   ta.addEventListener('input', () => { guncelle(); degisti && degisti(ta.value); });
   ta.addEventListener('scroll', () => { gut.scrollTop = ta.scrollTop; });
   ta.addEventListener('focus', () => { aktifEditor = api; });
@@ -1438,7 +1440,11 @@ function alistirmaCiz() {
 function soruCalismaCiz(host, q, { mod, liste, onKontrol }) {
   const mulakat = mod === 'mulakat';
   const idx = liste ? liste.findIndex(x => x.id === q.id) : -1;
-  const baslangic = q.dil === 'sql' ? '-- Sorgunu buraya yaz\n' : '# Cevabını sonuc değişkenine ata\nsonuc = ';
+  const yerTutucu = q.dil === 'sql' ? '-- Sorgunu buraya yaz' : '# Cevabını sonuc değişkenine ata\nsonuc = ...';
+  // Eski sürümde başlangıç yazısı editöre gerçek metin olarak konuyordu; değiştirilmemiş eski taslaklar boş sayılır.
+  const ESKI_BASLANGIC = ['-- Sorgunu buraya yaz\n', '# Cevabını sonuc değişkenine ata\nsonuc = '];
+  let ilkKod = (mulakat ? S.mulakat.kod[q.id] : depo.taslak[q.id]) ?? '';
+  if (ESKI_BASLANGIC.includes(ilkKod)) ilkKod = '';
   host.innerHTML = `
     <div class="soru-kart">
       <div class="rozetler"><span class="rozet dil-${q.dil}">${DIL[q.dil]}</span><span class="rozet sev-${q.seviye}">${SEVIYE[q.seviye]}</span><span class="rozet">${esc(q.kategori)}</span>${q.sirali ? '<span class="rozet uyari">Sıralama önemli</span>' : ''}</div>
@@ -1465,7 +1471,7 @@ function soruCalismaCiz(host, q, { mod, liste, onKontrol }) {
       <button class="btn hafif" id="sonraki" ${idx < 0 || idx >= liste.length - 1 ? 'disabled' : ''}>Sonraki soru →</button></div>` : ''}`;
   const taslakKey = (mulakat ? 'm_' : '') + q.id;
   const ed = editorKur($('#ed', host), {
-    deger: (mulakat ? S.mulakat.kod[q.id] : depo.taslak[q.id]) ?? baslangic, dil: q.dil, calistir: () => calistirTik(),
+    deger: ilkKod, yerTutucu, dil: q.dil, calistir: () => calistirTik(),
     degisti: v => { if (mulakat) S.mulakat.kod[q.id] = v; else { depo.taslak[q.id] = v; kaydetGecikmeli(); } }
   });
   let sonCikti = null;
@@ -1477,6 +1483,7 @@ function soruCalismaCiz(host, q, { mod, liste, onKontrol }) {
 
   async function calistirTik() {
     const c = $('#cikti', host);
+    if (!ed.get().trim()) { c.innerHTML = `<div class="bilgi">Editör boş. Önce ${q.dil === 'sql' ? 'sorgunu' : 'kodunu'} yaz.</div>`; return null; }
     c.innerHTML = q.dil === 'python' && pyDurum !== 'hazir' ? pyBekleHTML() : '<div class="yukleniyor">Çalışıyor…</div>';
     await bekle(16);
     try { sonCikti = await calistir(q.dil, ed.get(), true); c.innerHTML = ciktiHTML(sonCikti); }
@@ -1485,6 +1492,7 @@ function soruCalismaCiz(host, q, { mod, liste, onKontrol }) {
   }
   async function kontrolTik() {
     const k = $('#karar', host);
+    if (!ed.get().trim()) { k.innerHTML = `<div class="bilgi">Editör boş. Önce ${q.dil === 'sql' ? 'sorgunu' : 'kodunu'} yaz, sonra kontrol et.</div>`; return; }
     k.innerHTML = '<div class="yukleniyor">Kontrol ediliyor…</div>';
     const [bek, gel] = await Promise.all([beklenenAl(q), calistirTik()]);
     let sonuc;

@@ -144,6 +144,8 @@ main { padding: 18px max(16px, 2vw) 40px; }
 .editor { display: grid; grid-template-columns: auto 1fr; background: var(--kod-zemin); min-height: var(--h, 200px); height: var(--h, 200px); resize: vertical; overflow: hidden; }
 .gutter { margin: 0; padding: 12px 8px 12px 14px; text-align: right; color: var(--h-yorum); user-select: none; overflow: hidden; font: 13.5px/1.6 var(--f-kod); border-right: 1px solid var(--cizgi); min-width: 42px; }
 .editor textarea { border: 0; outline: none; resize: none; padding: 12px 14px; background: transparent; font: 13.5px/1.6 var(--f-kod); color: var(--murekkep); tab-size: 4; white-space: pre; overflow: auto; height: 100%; }
+.editor textarea::placeholder { color: var(--h-yorum); opacity: 1; font-style: italic; }
+.editor textarea:focus::placeholder { color: transparent; }
 .editor:focus-within { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--vurgu) 45%, transparent); }
 .arac-cubugu { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; border-top: 1px solid var(--cizgi); }
 .soru-kart .arac-cubugu, .bos-durum .arac-cubugu { border: 0; padding: 0; }
